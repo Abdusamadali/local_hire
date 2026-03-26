@@ -16,7 +16,7 @@ class EmployeeHome extends StatefulWidget {
 class _EmployeeHomeState extends State<EmployeeHome> {
 
   final _pages =[
-    job_page(),
+    EmployeeJobsPage(),
     Myjob(),
     MyProfile()
   ];

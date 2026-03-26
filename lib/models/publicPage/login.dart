@@ -87,8 +87,7 @@ class _LoginState extends State<Login> {
                       }else{
                         print('token not loaded---------------------------------------');
                       }
-                      final response =await api.getEmployees();
-                      print(response.data);
+
                     },
                     child: Text(
                         'Login'

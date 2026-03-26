@@ -1,17 +1,21 @@
+import 'package:dio/src/response.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:local_hire/models/apiModel/Post.dart';
 import 'package:local_hire/sevices/ApiServices.dart';
 import 'package:provider/provider.dart';
 
-class EmployeeJobsPage extends StatefulWidget {
-  const EmployeeJobsPage({super.key});
+import 'CreateJobPage.dart';
+
+class jobsPage extends StatefulWidget {
+  const jobsPage({super.key});
 
   @override
-  State<EmployeeJobsPage> createState() => _EmployeeJobsPageState();
+  State<jobsPage> createState() => _jobsPageState();
 }
 
-class _EmployeeJobsPageState extends State<EmployeeJobsPage> {
+class _jobsPageState extends State<jobsPage> {
 
   late Future<List<Post>> _jobsFuture;
 
@@ -23,7 +27,7 @@ class _EmployeeJobsPageState extends State<EmployeeJobsPage> {
 
   Future<List<Post>> fetchJobs() async {
     final api = context.read<ApiService>();
-    final res = await api.getJobEmployee(); // get all jobs
+    final res = await api.getJobsEmployer();
     return (res.data as List).map((e) => Post.fromJson(e)).toList();
   }
 
@@ -40,14 +44,28 @@ class _EmployeeJobsPageState extends State<EmployeeJobsPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Available Jobs"),
+        title: const Text('My jobs'),
         actions: [
+
+          /// create job
+          IconButton(
+            onPressed: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const CreateJobPage()),
+              );
+
+              /// refresh after coming back
+              _refreshJobs();
+            },
+            icon: const Icon(Iconsax.add),
+          ),
 
           /// logout
           IconButton(
             onPressed: api.logOut,
-            icon: const Icon(Iconsax.logout),
-          )
+            icon: const Icon(Icons.output),
+          ),
         ],
       ),
 
@@ -67,7 +85,7 @@ class _EmployeeJobsPageState extends State<EmployeeJobsPage> {
             }
 
             if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Center(child: Text("No jobs available"));
+              return const Center(child: Text("No jobs found"));
             }
 
             final posts = snapshot.data!;
@@ -75,7 +93,8 @@ class _EmployeeJobsPageState extends State<EmployeeJobsPage> {
             return ListView.builder(
               itemCount: posts.length,
               itemBuilder: (context, index) {
-                return jobCard(posts[index]);
+                final p = posts[index];
+                return jobs(p, context);
               },
             );
           },
@@ -95,23 +114,26 @@ class _EmployeeJobsPageState extends State<EmployeeJobsPage> {
     }
   }
 
-  Widget jobCard(Post p) {
-
-    final api = context.read<ApiService>();
-
+  Widget jobs(Post p, BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-
       child: Card(
-        elevation: 5,
+        elevation: 6,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
 
-          onTap: () {
+          onTap: () async{
+           final api =  context.read<ApiService>();
+           final res =await api.getJobApplication(p.id);
+           print(res.data);
+            // showSheet(context, p);
+          },
+
+          onLongPress: () {
+            HapticFeedback.mediumImpact();
             showSheet(context, p);
           },
 
@@ -126,7 +148,6 @@ class _EmployeeJobsPageState extends State<EmployeeJobsPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-
                     Text(
                       p.jobType ?? "Job",
                       style: const TextStyle(
@@ -138,12 +159,10 @@ class _EmployeeJobsPageState extends State<EmployeeJobsPage> {
                     Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 10, vertical: 4),
-
                       decoration: BoxDecoration(
                         color: _statusColor(p.status).withOpacity(0.15),
                         borderRadius: BorderRadius.circular(20),
                       ),
-
                       child: Text(
                         p.status ?? "",
                         style: TextStyle(
@@ -161,7 +180,10 @@ class _EmployeeJobsPageState extends State<EmployeeJobsPage> {
                   children: [
                     const Icon(Icons.currency_rupee, size: 18),
                     const SizedBox(width: 5),
-                    Text("${p.salary}"),
+                    Text(
+                      "${p.salary}",
+                      style: const TextStyle(fontSize: 16),
+                    ),
                   ],
                 ),
 
@@ -182,10 +204,10 @@ class _EmployeeJobsPageState extends State<EmployeeJobsPage> {
                     const Icon(Icons.location_on,
                         size: 18, color: Colors.red),
                     const SizedBox(width: 6),
-
                     Expanded(
                       child: Text(
                         "${p.location?.area}, ${p.location?.city}",
+                        style: const TextStyle(fontSize: 14),
                       ),
                     ),
                   ],
@@ -200,37 +222,6 @@ class _EmployeeJobsPageState extends State<EmployeeJobsPage> {
                     color: Colors.grey[600],
                   ),
                 ),
-
-                // const SizedBox(height: 14),
-                //
-                // /// APPLY BUTTON
-                // SizedBox(
-                //   width: double.infinity,
-                //
-                //   child: ElevatedButton(
-                //     onPressed: () async {
-                //
-                //       try {
-                //
-                //         await api.applyJob(p.id);
-                //
-                //         ScaffoldMessenger.of(context).showSnackBar(
-                //           const SnackBar(
-                //             content: Text("Application submitted"),
-                //           ),
-                //         );
-                //
-                //       } catch (e) {
-                //
-                //         ScaffoldMessenger.of(context).showSnackBar(
-                //           SnackBar(content: Text("Error: $e")),
-                //         );
-                //       }
-                //     },
-                //
-                //     child: const Text("Apply"),
-                //   ),
-                // )
               ],
             ),
           ),
@@ -239,16 +230,13 @@ class _EmployeeJobsPageState extends State<EmployeeJobsPage> {
     );
   }
 
-  /// Job Details Sheet
   void showSheet(BuildContext context, Post p) {
-
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
 
       builder: (context) {
-
         return Container(
           height: MediaQuery.of(context).size.height * 0.65,
           padding: const EdgeInsets.all(20),
@@ -264,6 +252,19 @@ class _EmployeeJobsPageState extends State<EmployeeJobsPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
 
+              Center(
+                child: Container(
+                  height: 5,
+                  width: 60,
+                  decoration: BoxDecoration(
+                    color: Colors.grey,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
               const Text(
                 "Job Details",
                 style: TextStyle(
@@ -274,12 +275,13 @@ class _EmployeeJobsPageState extends State<EmployeeJobsPage> {
 
               const SizedBox(height: 20),
 
+              _infoRow(Icons.badge, "Job ID", "${p.id}"),
               _infoRow(Icons.work, "Job Type", "${p.jobType}"),
               _infoRow(Icons.currency_rupee, "Salary", "${p.salary}"),
               _infoRow(Icons.schedule, "Shift", "${p.shiftType}"),
               _infoRow(Icons.check_circle, "Status", "${p.status}"),
 
-              const Divider(),
+              const Divider(height: 30),
 
               const Text(
                 "Location",
@@ -300,74 +302,22 @@ class _EmployeeJobsPageState extends State<EmployeeJobsPage> {
 
               SizedBox(
                 width: double.infinity,
-                child: Row(
-                  children: [
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
 
-                    /// CLOSE BUTTON
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-
-                        child: const Text(
-                          "Close",
-                          style: TextStyle(fontSize: 16),
-                        ),
-                      ),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
+                  ),
 
-                    const SizedBox(width: 12),
-
-                    /// APPLY BUTTON
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () async {
-
-                          final api = context.read<ApiService>();
-
-                          try {
-
-                            final s = await api.applyJob(p.id);
-                            // if(s.data !="saved") {
-                            //   throw Future.error(s.data);
-                            // }
-                            Navigator.of(context).pop();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text("Application submitted"),
-                              ),
-                            );
-                          } catch (e) {
-                            print(e);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text("Error: $e")),
-                            );
-                          }
-                        },
-
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          backgroundColor: Colors.blue,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-
-                        child: const Text(
-                          "Apply",
-                          style: TextStyle(fontSize: 16),
-                        ),
-                      ),
-                    ),
-                  ],
+                  child: const Text(
+                    "Close",
+                    style: TextStyle(fontSize: 16),
+                  ),
                 ),
               )
             ],
@@ -378,13 +328,11 @@ class _EmployeeJobsPageState extends State<EmployeeJobsPage> {
   }
 
   Widget _infoRow(IconData icon, String title, String value) {
-
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
 
       child: Row(
         children: [
-
           Icon(icon, size: 20, color: Colors.blue),
           const SizedBox(width: 10),
 
@@ -392,9 +340,11 @@ class _EmployeeJobsPageState extends State<EmployeeJobsPage> {
             "$title : ",
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
+
           Expanded(child: Text(value)),
         ],
       ),
     );
   }
 }
+

@@ -11,7 +11,7 @@ String postsToJson(List<Post> data) =>
 
 class Post {
   Employer? employer;
-  int? id;
+  int id;
   String? jobType;
   Location? location;
   int? salary;
@@ -20,7 +20,7 @@ class Post {
 
   Post({
     this.employer,
-    this.id,
+    required this.id,
     this.jobType,
     this.location,
     this.salary,

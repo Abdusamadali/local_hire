@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:local_hire/models/apiModel/LoginResponse.dart';
+import 'package:local_hire/models/apiModel/api_job_post_dto.dart';
 import 'package:local_hire/provider/authProvider.dart';
 
 class ApiService {
@@ -29,8 +30,27 @@ class ApiService {
     );
   }
 
-  Future<Response> getEmployees() async {
-    return await _dio.get("http://10.0.2.2:8081/localHire/employer",);
+  Future<void>deleteJob()async{
+
+  }
+
+  Future<Response>getJobApplication(int id)async{
+
+    final res =  await _dio.get("http://10.0.2.2:8081/localHire/employer/jobs/$id/applications");
+return res;
+  }
+
+  Future<Response> getJobsEmployer() async {
+    return await _dio.get("http://10.0.2.2:8081/localHire/employer");
+  }
+
+
+  Future<void> createJob(RequestJobPostDto job)async {
+   final res = await _dio.post(
+        "http://10.0.2.2:8081/localHire/employer",
+      data: job.toJson()
+    );
+   print(res.data);
   }
 
   Future<LoginResponse?> login(String username, String password) async {
@@ -54,5 +74,15 @@ class ApiService {
   }
   void logOut(){
     authProvider.logout();
+  }
+
+  Future<Response>getJobEmployee()async{
+    Response future =await  _dio.get("http://10.0.2.2:8081/localHire/employee");
+    return future;
+  }
+
+  Future<Response> applyJob(int id) async {
+      Response res = await _dio.post("http://10.0.2.2:8081/localHire/employee/jobs/$id");
+     return res;
   }
 }
