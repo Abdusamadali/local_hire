@@ -30,6 +30,8 @@ class _EmployeeHomeState extends State<EmployeeHome> {
         currentIndex: index,
           onTap: (currIndex) {
             setState(() {
+              print('set state for the page');
+
               index = currIndex;
             });
           },

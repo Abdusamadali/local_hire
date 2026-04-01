@@ -20,7 +20,7 @@ class _CreateJobPageState extends State<CreateJobPage> {
   final cityController = TextEditingController();
   final areaController = TextEditingController();
   final pinController = TextEditingController();
-
+  final descriptionController = TextEditingController();
   String? jobType;
   String? shiftType;
   String? status;
@@ -107,7 +107,7 @@ class _CreateJobPageState extends State<CreateJobPage> {
 
               /// Job Status
               DropdownButtonFormField<String>(
-                value: status,
+                initialValue: status,
                 decoration: _inputDecoration("Job Status", Icons.check_circle),
                 items: jobStatus.map((e) {
                   return DropdownMenuItem(
@@ -165,6 +165,30 @@ class _CreateJobPageState extends State<CreateJobPage> {
 
               const SizedBox(height: 30),
 
+              //description
+              SizedBox(
+                height: 200,
+                child: TextFormField(
+                  keyboardType: TextInputType.multiline,
+                  maxLines: null,
+                  expands: true,
+                  maxLength: 200,
+                  controller: descriptionController,
+                  textAlignVertical: TextAlignVertical.top, // ✅ FIX
+
+                  decoration: InputDecoration(
+                    hintText: "Write description...",
+                    filled: true,
+                    label: Text("Description"),
+                    fillColor: Colors.grey.shade100,
+                    contentPadding: EdgeInsets.all(16),
+
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
               /// Save button
               SizedBox(
                 width: double.infinity,
@@ -186,6 +210,7 @@ class _CreateJobPageState extends State<CreateJobPage> {
                         status: status!,
                         shiftType: shiftType!,
                         jobType: jobType!,
+                        description: descriptionController.text,
                         location: Location(
                           state: stateController.text,
                           city: cityController.text,
@@ -198,7 +223,6 @@ class _CreateJobPageState extends State<CreateJobPage> {
                       print("Save job");
 
                     }
-
                   },
                   icon: const Icon(Icons.save),
                   label: const Text("Save Job"),

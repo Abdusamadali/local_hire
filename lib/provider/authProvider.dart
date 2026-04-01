@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 class AuthProvider extends ChangeNotifier {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
@@ -17,8 +18,31 @@ class AuthProvider extends ChangeNotifier {
 
   // Load token and role when app starts
   Future<void> loadAuth() async {
-    _token = await _storage.read(key: "token");
-    _role = await _storage.read(key: "role");
+    final token = await _storage.read(key: "token");
+    final role = await _storage.read(key: "role");
+
+    if(token != null) {
+
+      try{
+        bool isExpired = JwtDecoder.isExpired(token);
+
+        if (isExpired) {
+          _token = null;
+          _role = null;
+          await _storage.delete(key: "token");
+          await _storage.delete(key: "role");
+        } else {
+          _token = token;
+          _role = role;
+        }
+      }catch(e){
+        _token = null;
+        _role = null;
+        await _storage.delete(key: "token");
+        await _storage.delete(key: "role");
+      }
+    }
+
     notifyListeners();
   }
 
