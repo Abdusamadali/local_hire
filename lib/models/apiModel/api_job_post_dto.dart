@@ -14,7 +14,6 @@ class RequestJobPostDto {
     required this.jobType,
     required this.location,
     this.description
-
   });
 
   Map<String, dynamic> toJson() {
@@ -24,6 +23,7 @@ class RequestJobPostDto {
       "shiftType": shiftType,
       "jobType": jobType,
       "location": location.toJson(),
+      "description":description
     };
   }
 }

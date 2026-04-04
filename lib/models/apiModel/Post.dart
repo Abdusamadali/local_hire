@@ -17,7 +17,7 @@ class Post {
   int? salary;
   String? shiftType;
   String? status;
-
+  String? description;
   Post({
     this.employer,
     required this.id,
@@ -26,6 +26,7 @@ class Post {
     this.salary,
     this.shiftType,
     this.status,
+    this.description
   });
 
   factory Post.fromJson(Map<String, dynamic> json) => Post(
@@ -38,6 +39,7 @@ class Post {
     salary: json["salary"],
     shiftType: json["shiftType"],
     status: json["status"],
+    description: json["description"]
   );
 
   Map<String, dynamic> toJson() => {
@@ -48,6 +50,7 @@ class Post {
     "salary": salary,
     "shiftType": shiftType,
     "status": status,
+    "description":description
   };
 }
 

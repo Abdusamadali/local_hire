@@ -1,22 +1,61 @@
+
+
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:local_hire/models/employer/constant/JobStatusType.dart';
-import 'package:local_hire/models/employer/constant/jobType.dart';
-import 'package:local_hire/models/employer/constant/shiftType.dart';
-import 'package:local_hire/sevices/ApiServices.dart';
 import 'package:provider/provider.dart';
 
+import '../../sevices/ApiServices.dart';
 import '../apiModel/api_job_post_dto.dart';
+import 'constant/JobStatusType.dart';
+import 'constant/jobType.dart';
+import 'constant/shiftType.dart';
 
-class CreateJobPage extends StatefulWidget {
-  final VoidCallback onJobCreated;
-
-  const CreateJobPage({super.key, required this.onJobCreated});
+class updatePage extends StatefulWidget {
+  final RequestJobPostDto post;
+  final int id;
+  const updatePage({super.key, required this.post,required this.id });
 
   @override
-  State<CreateJobPage> createState() => _CreateJobPageState();
+  State<updatePage> createState() => _updatePageState();
 }
 
-class _CreateJobPageState extends State<CreateJobPage> {
+class _updatePageState extends State<updatePage> {
+
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    final post = widget.post;
+
+  
+    salaryController.text = post.salary.toString();
+    descriptionController.text = post.description??"";
+
+    stateController.text = post.location.state;
+    cityController.text = post.location.city;
+    areaController.text = post.location.area;
+    pinController.text = post.location.pincode;
+
+    jobType = JobType.values.firstWhere(
+          (e) => e.name.toLowerCase() == post.jobType.toLowerCase(),
+          orElse: ()=>JobType.helper
+    );
+
+    shiftType = ShiftType.values.firstWhere(
+          (e) => e.name.toLowerCase() == post.shiftType.toLowerCase(),
+        orElse: ()=>ShiftType.fullDay
+    );
+
+    jobStatus = JobStatus.values.firstWhere(
+          (e) => e.name.toLowerCase() == post.status.toLowerCase(),
+          orElse: ()=>JobStatus.open
+    );
+
+  }
+
+
   final _formKey = GlobalKey<FormState>();
 
   final salaryController = TextEditingController();
@@ -26,33 +65,10 @@ class _CreateJobPageState extends State<CreateJobPage> {
   final pinController = TextEditingController();
   final descriptionController = TextEditingController();
 
-  JobType? jobType;
+  JobType? jobType ;
   JobStatus? jobStatus;
   ShiftType? shiftType;
-
-
-  // final List<String> jobTypes = [
-  //   "HELPER",
-  //   "CASHIER",
-  //   "LOADER",
-  //   "SALES",
-  //   "CLEANING",
-  //   "SECURITY",
-  //   "DELIVERY",
-  //   "OTHER"
-  // ];
-  //
-  // final List<String> shiftTypes = [
-  //   "MORNING",
-  //   "EVENING",
-  //   "NIGHT",
-  //   "FULL_DAY"
-  // ];
-  //
-  // final List<String> jobStatus = [
-  //   "OPEN",
-  //   "CLOSED"
-  // ];
+  
 
 
   @override
@@ -60,7 +76,7 @@ class _CreateJobPageState extends State<CreateJobPage> {
     final api =  context.read<ApiService>();
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Create Job"),
+        title: const Text("Update Job"),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(18),
@@ -205,7 +221,7 @@ class _CreateJobPageState extends State<CreateJobPage> {
 
                     if (_formKey.currentState!.validate()) {
 
-                      // ///  API logic here later
+                      // /// You will add API logic here later
                       //  String salary = salaryController.text;
                       //  String state = stateController.text;
                       //  String city = cityController.text;
@@ -226,17 +242,17 @@ class _CreateJobPageState extends State<CreateJobPage> {
                         ),
                       );
 
-                      api.createJob(job);
-                      print("Save job");
+                      api.updateJob(job,widget.id);
+
                       // Navigator.pushReplacement(
                       //   context,
                       //   MaterialPageRoute(builder: (_)=>jobsPage())
                       // );
-                      widget.onJobCreated();
+
                     }
                   },
                   icon: const Icon(Icons.save),
-                  label: const Text("Save Job"),
+                  label: const Text("Update Job"),
                 ),
               )
             ],
@@ -255,5 +271,4 @@ class _CreateJobPageState extends State<CreateJobPage> {
       ),
     );
   }
-
 }

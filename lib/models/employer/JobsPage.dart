@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:local_hire/models/apiModel/Post.dart';
+import 'package:local_hire/models/apiModel/api_job_post_dto.dart' as dto;
+import 'package:local_hire/models/employer/updatePage.dart';
 import 'package:local_hire/sevices/ApiServices.dart';
 import 'package:provider/provider.dart';
 
@@ -46,19 +48,10 @@ class _jobsPageState extends State<jobsPage> {
       appBar: AppBar(
         title: const Text('My jobs'),
         actions: [
-
           /// create job
           IconButton(
-            onPressed: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const CreateJobPage()),
-              );
-
-              /// refresh after coming back
-              _refreshJobs();
-            },
-            icon: const Icon(Iconsax.add),
+            onPressed: _refreshJobs, // 🔥 just refresh
+            icon: const Icon(Icons.refresh),
           ),
 
           /// logout
@@ -126,10 +119,8 @@ class _jobsPageState extends State<jobsPage> {
           borderRadius: BorderRadius.circular(16),
 
           onTap: () async{
-           final api =  context.read<ApiService>();
-           final res =await api.getJobApplication(p.id);
-           print(res.data);
             // showSheet(context, p);
+            updateJob(context,p);
           },
 
           onLongPress: () {
@@ -326,6 +317,33 @@ class _jobsPageState extends State<jobsPage> {
       },
     );
   }
+
+  void updateJob(BuildContext context, Post p) {
+    print(p.description);
+
+    final Dto = dto.RequestJobPostDto(
+      salary: p.salary ?? 0,
+      status: p.status ?? "",
+      shiftType: p.shiftType ?? "",
+      jobType: p.jobType ?? "",
+      description: p.description ?? "",
+
+      location: dto.Location(
+        state: p.location?.state ?? "",
+        city: p.location?.city ?? "",
+        area: p.location?.area ?? "",
+        pincode: p.location?.pincode ?? "",
+      ),
+    );
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => updatePage(post: Dto,id: p.id,),
+      ),
+    );
+  }
+
 
   Widget _infoRow(IconData icon, String title, String value) {
     return Padding(

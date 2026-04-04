@@ -36,8 +36,8 @@ class ApiService {
 
   Future<Response>getJobApplication(int id)async{
 
-    final res =  await _dio.get("http://10.0.2.2:8081/localHire/employer/jobs/$id/applications");
-return res;
+    return  await _dio.get("http://10.0.2.2:8081/localHire/employer/jobs/$id/applications");
+    
   }
 
   Future<Response> getJobsEmployer() async {
@@ -53,6 +53,14 @@ return res;
    print(res.data);
   }
 
+  Future<void>updateJob(RequestJobPostDto job,int id)async {
+    final res =  await _dio.put(
+        "http://10.0.2.2:8081/localHire/employer/$id",
+        data: job.toJson()
+    );
+    print(res);
+  }
+  
   Future<LoginResponse?> login(String username, String password) async {
     try {
       final response = await _dio.post(
@@ -85,4 +93,6 @@ return res;
       Response res = await _dio.post("http://10.0.2.2:8081/localHire/employee/jobs/$id");
      return res;
   }
+  
+  
 }

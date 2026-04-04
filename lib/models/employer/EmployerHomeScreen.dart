@@ -1,9 +1,6 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:local_hire/models/employer/CreateJobPage.dart';
-
 import 'JobsPage.dart';
 
 class EmployerHome extends StatefulWidget {
@@ -15,32 +12,45 @@ class EmployerHome extends StatefulWidget {
 
 class _EmployerHomeState extends State<EmployerHome> {
 
-  List<Widget> pages = [CreateJobPage(),jobsPage()];
-  int currIndex = 0;
+  int currIndex = 0; //  keep state here
 
   @override
   Widget build(BuildContext context) {
 
+    List<Widget> pages = [
+      CreateJobPage(
+        onJobCreated: () {
+          setState(() {
+            currIndex = 1; //  switch to Jobs tab
+          });
+        },
+      ),
+      jobsPage(),
+    ];
 
     return Scaffold(
       body: pages[currIndex],
+
       bottomNavigationBar: BottomNavigationBar(
-          currentIndex: currIndex,
-        onTap:(index){
-         setState(() {
-           currIndex = index;
-         });
+        currentIndex: currIndex,
+        onTap: (index) {
+          setState(() {
+            currIndex = index;
+          });
         },
-        items: [
+        items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),label: 'home',activeIcon: Icon(Iconsax.home)
+            icon: Icon(Icons.home),
+            activeIcon: Icon(Iconsax.home),
+            label: 'Home',
           ),
           BottomNavigationBarItem(
-              icon: Icon(Icons.multiple_stop_sharp),label: 'Jobs',activeIcon: Icon(Iconsax.home)
+            icon: Icon(Icons.work),
+            activeIcon: Icon(Iconsax.briefcase),
+            label: 'Jobs',
           ),
         ],
       ),
     );
   }
 }
-
