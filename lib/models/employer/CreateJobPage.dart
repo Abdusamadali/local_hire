@@ -72,6 +72,11 @@ class _CreateJobPageState extends State<CreateJobPage> {
               /// Salary
               TextFormField(
                 controller: salaryController,
+                validator: (v){
+                  if( v == null || v.isEmpty){
+                    return "Salary cannot be empty";
+                  }
+                },
                 keyboardType: TextInputType.number,
                 decoration: _inputDecoration("Salary", Icons.currency_rupee),
               ),
@@ -145,6 +150,12 @@ class _CreateJobPageState extends State<CreateJobPage> {
 
               TextFormField(
                 controller: stateController,
+                validator: (v){
+                  if(v == null || v.isEmpty){
+                    return "State is required";
+                  }
+                  return null;
+                },
                 decoration: _inputDecoration("State", Icons.map),
               ),
 
@@ -152,6 +163,13 @@ class _CreateJobPageState extends State<CreateJobPage> {
 
               TextFormField(
                 controller: cityController,
+                validator: (v){
+                  if(v == null || v.isEmpty){
+                    return "City is required";
+                  }
+
+                  return null;
+                },
                 decoration: _inputDecoration("City", Icons.location_city),
               ),
 
@@ -159,6 +177,12 @@ class _CreateJobPageState extends State<CreateJobPage> {
 
               TextFormField(
                 controller: areaController,
+                validator: (v){
+                  if(v== null || v.isEmpty){
+                    return "Area is required";
+                  }
+                  return null;
+                },
                 decoration: _inputDecoration("Area", Icons.home),
               ),
 
@@ -167,6 +191,14 @@ class _CreateJobPageState extends State<CreateJobPage> {
               TextFormField(
                 controller: pinController,
                 keyboardType: TextInputType.number,
+                validator: (v){
+                  if(v == null || v.isEmpty){
+                    return "Pincode is required";
+                  }
+                  if(v.length != 6){
+                    return "Enter valid pincode";
+                  }
+                },
                 decoration: _inputDecoration("Pincode", Icons.pin_drop),
               ),
 

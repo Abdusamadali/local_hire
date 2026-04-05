@@ -41,13 +41,13 @@ class _jobsPageState extends State<jobsPage> {
 
   @override
   Widget build(BuildContext context) {
-
     final api = context.read<ApiService>();
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('My jobs'),
         actions: [
+
           /// create job
           IconButton(
             onPressed: _refreshJobs, // 🔥 just refresh
@@ -68,7 +68,6 @@ class _jobsPageState extends State<jobsPage> {
         child: FutureBuilder<List<Post>>(
           future: _jobsFuture,
           builder: (context, snapshot) {
-
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
             }
@@ -118,16 +117,20 @@ class _jobsPageState extends State<jobsPage> {
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
 
-          onTap: () async{
+          onTap: () async {
+            showSheet(context, p);
+
             // showSheet(context, p);
-            updateJob(context,p);
           },
 
           onLongPress: () {
             HapticFeedback.mediumImpact();
-            showSheet(context, p);
+            updateJob(context, p);
           },
 
+          onDoubleTap: () {
+
+          },
           child: Padding(
             padding: const EdgeInsets.all(16),
 
@@ -221,6 +224,7 @@ class _jobsPageState extends State<jobsPage> {
     );
   }
 
+  /// bottom sheet
   void showSheet(BuildContext context, Post p) {
     showModalBottomSheet(
       context: context,
@@ -229,7 +233,10 @@ class _jobsPageState extends State<jobsPage> {
 
       builder: (context) {
         return Container(
-          height: MediaQuery.of(context).size.height * 0.65,
+          height: MediaQuery
+              .of(context)
+              .size
+              .height * 0.68,
           padding: const EdgeInsets.all(20),
 
           decoration: const BoxDecoration(
@@ -291,27 +298,264 @@ class _jobsPageState extends State<jobsPage> {
 
               const Spacer(),
 
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
 
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+              Column(
+                children: [
+
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            // TODO edit button
+                          },
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Text(
+                            "Edit",
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(width: 12),
+
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            // TODO:- Change logic
+                          },
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Text(
+                            "Close Job",
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  /// close
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text(
+                        "Cancel",
+                        style: TextStyle(fontSize: 16),
+                      ),
                     ),
                   ),
-
-                  child: const Text(
-                    "Close",
-                    style: TextStyle(fontSize: 16),
-                  ),
-                ),
+                ],
               )
             ],
+          ),
+        );
+      },
+    );
+
+}
+
+// update section
+//   void showUpdateDialog(BuildContext context, Post p) {
+//     showDialog(
+//       context: context,
+//       builder: (context) {
+//         return AlertDialog(
+//           title: Text("Confirm Update"),
+//           content: Text("Are you sure you want to update this job?"),
+//           shape: RoundedRectangleBorder(
+//             borderRadius: BorderRadius.circular(12),
+//           ),
+//
+//           actions: [
+//             /// Cancel Button
+//             TextButton(
+//               onPressed: () {
+//                 Navigator.pop(context); // close dialog
+//               },
+//               child: Text("Cancel"),
+//             ),
+//
+//             /// Update Button
+//             ElevatedButton(
+//               onPressed: () {
+//                 Navigator.pop(context); // close dialog
+//
+//                 updateJob(context,p); // call your update function
+//               },
+//               child: Text("Update"),
+//             ),
+//           ],
+//         );
+//       },
+//     );
+//   }
+
+  void showUpdateDialog(BuildContext context, Post p) {
+    final theme = Theme.of(context);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+
+                /// 🔥 Top Row (Title + Close)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Update Job",
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                  ],
+                ),
+
+                const SizedBox(height: 10),
+
+                /// Message
+                Text(
+                  "Do you want to update this job?",
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyMedium,
+                ),
+
+                const SizedBox(height: 25),
+
+                /// Buttons Row
+                Row(
+                  children: [
+
+                    /// Cancel
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text("Cancel"),
+                      ),
+                    ),
+
+                    const SizedBox(width: 12),
+
+                    /// Update
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          updateJob(context, p);
+                        },
+                        child: const Text("Update"),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void showCloseDialog(BuildContext context, Post p,) {
+    final theme = Theme.of(context);
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+
+                /// 🔥 Top Row (Title + Close)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Close Job",
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                  ],
+                ),
+
+                const SizedBox(height: 10),
+
+                /// Message
+                Text(
+                  "Do you want to close this job?",
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyMedium,
+                ),
+
+                const SizedBox(height: 25),
+
+                /// Buttons Row
+                Row(
+                  children: [
+
+                    /// Cancel
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text("Cancel"),
+                      ),
+                    ),
+
+                    const SizedBox(width: 12),
+
+                    /// Update
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          updateJob(context, p);
+                        },
+                        child: const Text("Close"),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -345,6 +589,13 @@ class _jobsPageState extends State<jobsPage> {
   }
 
 
+
+  void closeJob(BuildContext context, Post job){
+      final api =context.read<ApiService>();
+     api.closeJob(job.id);
+  }
+
+
   Widget _infoRow(IconData icon, String title, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
@@ -364,5 +615,6 @@ class _jobsPageState extends State<jobsPage> {
       ),
     );
   }
+
 }
 

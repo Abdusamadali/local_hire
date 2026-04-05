@@ -89,6 +89,15 @@ class _updatePageState extends State<updatePage> {
               TextFormField(
                 controller: salaryController,
                 keyboardType: TextInputType.number,
+                validator: (value){
+                  if(value == null || value.isEmpty){
+                    return "salary is required";
+                  }
+                  if(int.tryParse(value) == null){
+                    return "Enter valid number";
+                  }
+                  return null;
+                },
                 decoration: _inputDecoration("Salary", Icons.currency_rupee),
               ),
 
@@ -162,6 +171,13 @@ class _updatePageState extends State<updatePage> {
               TextFormField(
                 controller: stateController,
                 decoration: _inputDecoration("State", Icons.map),
+                validator: (value){
+                  if(value== null || value.isEmpty ){
+                    return "State is required";
+                  }
+
+                  return null;
+                },
               ),
 
               const SizedBox(height: 12),
@@ -169,6 +185,12 @@ class _updatePageState extends State<updatePage> {
               TextFormField(
                 controller: cityController,
                 decoration: _inputDecoration("City", Icons.location_city),
+                validator: (value){
+                  if(value == null || value.isEmpty){
+                    return "City is Required";
+                  }
+                  return null;
+                },
               ),
 
               const SizedBox(height: 12),
@@ -176,6 +198,12 @@ class _updatePageState extends State<updatePage> {
               TextFormField(
                 controller: areaController,
                 decoration: _inputDecoration("Area", Icons.home),
+                validator: (value){
+                  if(value == null || value.isEmpty){
+                    return "Area cannot be null";
+                  }
+                  return null;
+                },
               ),
 
               const SizedBox(height: 12),
@@ -184,6 +212,17 @@ class _updatePageState extends State<updatePage> {
                 controller: pinController,
                 keyboardType: TextInputType.number,
                 decoration: _inputDecoration("Pincode", Icons.pin_drop),
+                validator: (value){
+                  if(value == null || value.isEmpty){
+                    return "Pincode is required";
+                  }
+
+                  if(value.length != 6){
+                    return "Enter Valid pincode";
+                  }
+
+                  return null;
+                },
               ),
 
               const SizedBox(height: 30),
@@ -197,7 +236,7 @@ class _updatePageState extends State<updatePage> {
                   expands: true,
                   maxLength: 200,
                   controller: descriptionController,
-                  textAlignVertical: TextAlignVertical.top, // ✅ FIX
+                  textAlignVertical: TextAlignVertical.top, // to the top
 
                   decoration: InputDecoration(
                     hintText: "Write description...",
@@ -205,7 +244,6 @@ class _updatePageState extends State<updatePage> {
                     label: Text("Description"),
                     fillColor: Colors.grey.shade100,
                     contentPadding: EdgeInsets.all(16),
-
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),

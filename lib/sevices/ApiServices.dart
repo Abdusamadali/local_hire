@@ -61,6 +61,11 @@ class ApiService {
     print(res);
   }
   
+  Future<void>closeJob(int id)async{
+   final res =  await _dio.delete("http://10.0.2.2:8081/localHire/employer/$id/close");
+   print(res.data);
+  }
+  
   Future<LoginResponse?> login(String username, String password) async {
     try {
       final response = await _dio.post(
