@@ -5,8 +5,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../sevices/ApiServices.dart';
-import '../apiModel/api_job_post_dto.dart';
+import '../../services/ApiServices.dart';
+import '../apiModel/RequestJobPostDto.dart';
 import 'constant/JobStatusType.dart';
 import 'constant/jobType.dart';
 import 'constant/shiftType.dart';
@@ -74,10 +74,12 @@ class _updatePageState extends State<updatePage> {
   @override
   Widget build(BuildContext context) {
     final api =  context.read<ApiService>();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Update Job"),
       ),
+
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(18),
         child: Form(

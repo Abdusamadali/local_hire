@@ -1,13 +1,15 @@
 import 'package:dio/src/response.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:local_hire/models/apiModel/Post.dart';
-import 'package:local_hire/models/apiModel/api_job_post_dto.dart' as dto;
+import 'package:local_hire/models/apiModel/RequestJobPostDto.dart' as dto;
+import 'package:local_hire/models/employer/JobApplications.dart';
 import 'package:local_hire/models/employer/updatePage.dart';
-import 'package:local_hire/sevices/ApiServices.dart';
 import 'package:provider/provider.dart';
 
+import '../../services/ApiServices.dart';
 import 'CreateJobPage.dart';
 
 class jobsPage extends StatefulWidget {
@@ -80,13 +82,30 @@ class _jobsPageState extends State<jobsPage> {
               return const Center(child: Text("No jobs found"));
             }
 
-            final posts = snapshot.data!;
+            final application = snapshot.data!;
 
             return ListView.builder(
-              itemCount: posts.length,
+              itemCount: application.length,
               itemBuilder: (context, index) {
-                final p = posts[index];
-                return jobs(p, context);
+                final p = application[index];
+                return Slidable(
+                    key:ValueKey(p.id),
+                    endActionPane: ActionPane(
+                        motion: DrawerMotion(),
+                        children: [
+                          SlidableAction(onPressed: (context){
+                            Navigator.push(
+                              context, 
+                              MaterialPageRoute(builder: (_)=>JobApplications(jobId: p.id))
+                            );
+                          },
+                            backgroundColor: Colors.blue,
+                            icon: Icons.people,
+                            label: 'Applications',
+                          )
+                        ]),
+                    child: jobs(p, context)
+                );
               },
             );
           },
@@ -609,12 +628,10 @@ class _jobsPageState extends State<jobsPage> {
             "$title : ",
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
-
           Expanded(child: Text(value)),
         ],
       ),
     );
   }
-
 }
 

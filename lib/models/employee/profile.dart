@@ -2,7 +2,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:local_hire/sevices/ApiServices.dart';
+import 'package:local_hire/services/ApiServices.dart';
 import 'package:provider/provider.dart';
 
 class MyProfile extends StatefulWidget {

@@ -2,8 +2,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:local_hire/provider/authProvider.dart';
+import '../publicPage/AuthPage.dart';
 import '../publicPage/RoleBasedHome.dart';
 import '../publicPage/login.dart';
+import '../publicPage/signup.dart';
 
 
 
@@ -18,7 +20,7 @@ class AuthWrapper extends StatelessWidget {
     if (authProvider.isLoggedIn) {
       return const RoleBasedHome();
     } else {
-      return const Login();
+      return const AuthPage();
     }
   }
 }

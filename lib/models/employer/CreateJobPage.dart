@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:local_hire/models/employer/constant/JobStatusType.dart';
 import 'package:local_hire/models/employer/constant/jobType.dart';
 import 'package:local_hire/models/employer/constant/shiftType.dart';
-import 'package:local_hire/sevices/ApiServices.dart';
 import 'package:provider/provider.dart';
 
-import '../apiModel/api_job_post_dto.dart';
+import '../../services/ApiServices.dart';
+import '../apiModel/RequestJobPostDto.dart';
 
 class CreateJobPage extends StatefulWidget {
   final VoidCallback onJobCreated;

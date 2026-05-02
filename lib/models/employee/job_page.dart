@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:local_hire/models/apiModel/Post.dart';
-import 'package:local_hire/sevices/ApiServices.dart';
 import 'package:provider/provider.dart';
+
+import '../../services/ApiServices.dart';
 
 class EmployeeJobsPage extends StatefulWidget {
   const EmployeeJobsPage({super.key});
@@ -14,6 +15,14 @@ class EmployeeJobsPage extends StatefulWidget {
 class _EmployeeJobsPageState extends State<EmployeeJobsPage> {
 
   late Future<List<Post>> _jobsFuture;
+  String _searchQuery = "";
+  List<Post> _allJobs = [];
+
+  final TextEditingController _searchController = TextEditingController();
+
+  String? selectedCity;
+  String? selectedType;
+  String? selectedShift;
 
   @override
   void initState() {
@@ -24,7 +33,9 @@ class _EmployeeJobsPageState extends State<EmployeeJobsPage> {
   Future<List<Post>> fetchJobs() async {
     final api = context.read<ApiService>();
     final res = await api.getJobEmployee(); // get all jobs
-    return (res.data as List).map((e) => Post.fromJson(e)).toList();
+    _allJobs = (res.data as List).map((e) => Post.fromJson(e)).toList();
+
+    return _allJobs;
   }
 
   Future<void> _refreshJobs() async {
@@ -51,37 +62,172 @@ class _EmployeeJobsPageState extends State<EmployeeJobsPage> {
         ],
       ),
 
-      body: RefreshIndicator(
-        onRefresh: _refreshJobs,
+      body: Column(
+        children: [
 
-        child: FutureBuilder<List<Post>>(
-          future: _jobsFuture,
-          builder: (context, snapshot) {
+          animatedSearchBar(),
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: _refreshJobs,
 
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
+              child: FutureBuilder<List<Post>>(
+                future: _jobsFuture,
+                builder: (context, snapshot) {
 
-            if (snapshot.hasError) {
-              return Center(child: Text("Error: ${snapshot.error}"));
-            }
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
 
-            if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Center(child: Text("No jobs available"));
-            }
+                  if (snapshot.hasError) {
+                    return Center(child: Text("Error: ${snapshot.error}"));
+                  }
 
-            final posts = snapshot.data!;
+                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(child: Text("No jobs available"));
+                  }
 
-            return ListView.builder(
-              itemCount: posts.length,
-              itemBuilder: (context, index) {
-                return jobCard(posts[index]);
-              },
-            );
-          },
-        ),
+                  final posts = _searchQuery.isEmpty
+                      ? _allJobs
+                      : _allJobs.where((job) {
+                    final query = _searchQuery;
+
+                    return (job.jobType?.toLowerCase().contains(query) ?? false) ||
+                        (job.shiftType?.toLowerCase().contains(query) ?? false) ||
+                        (job.location?.city?.toLowerCase().contains(query) ?? false) ||
+                        (job.location?.state?.toLowerCase().contains(query) ?? false) ||
+                        (job.description?.toLowerCase().contains(query) ?? false);
+                  }).toList();
+
+                  return ListView.builder(
+                    itemCount: posts.length,
+                    itemBuilder: (context, index) {
+                      return jobCard(posts[index]);
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
       ),
     );
+  }
+
+
+  Widget animatedSearchBar() {
+    return TweenAnimationBuilder(
+      duration: const Duration(milliseconds: 500),
+      tween: Tween(begin: -50.0, end: 0.0),
+
+      builder: (context, value, child) {
+        return Transform.translate(
+          offset: Offset(0, value),
+          child: Opacity(
+            opacity: (1 - (value.abs() / 50)).clamp(0, 1),
+            child: child,
+          ),
+        );
+      },
+
+      child: buildSearchBar(),
+    );
+  }
+
+  Widget buildSearchBar() {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeInOut,
+      margin: const EdgeInsets.fromLTRB(12, 10, 12, 6),
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          )
+        ],
+      ),
+
+      child: TextField(
+        controller: _searchController,
+
+        onChanged: (value) {
+          setState(() {
+            _searchQuery = value.toLowerCase();
+          });
+        },
+
+        onSubmitted: (_) {
+          _searchFromBackend();
+        },
+
+        decoration: InputDecoration(
+          icon: const Icon(Icons.search, color: Colors.grey),
+          hintText: "Search jobs, city, type...",
+          border: InputBorder.none,
+
+          suffixIcon: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+
+              /// CLEAR
+              if (_searchQuery.isNotEmpty)
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () {
+                    setState(() {
+                      _searchQuery = "";
+                      _searchController.clear();
+                      _jobsFuture = Future.value(_allJobs);
+                    });
+                  },
+                ),
+
+              /// SEARCH BUTTON (🔥 triggers backend)
+              IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: _searchFromBackend,
+              ),
+            ],
+          ),
+        ),
+      )
+    );
+  }
+
+  Future<void> _searchFromBackend() async {
+    final api = context.read<ApiService>();
+
+    final params = {
+      "title": _searchController.text,
+      "city": selectedCity,
+      "type": selectedType,
+      "shift": selectedShift,
+    };
+
+    params.removeWhere((key, value) => value == null || value == "");
+
+    try {
+      final res = await api.searchJobs(params);
+
+      final newJobs = (res.data as List)
+          .map((e) => Post.fromJson(e))
+          .toList();
+
+      setState(() {
+        _allJobs = newJobs; // 🔥 IMPORTANT
+        _jobsFuture = Future.value(newJobs);
+      });
+
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $e")),
+      );
+    }
   }
 
   Color _statusColor(String? status) {
@@ -95,9 +241,11 @@ class _EmployeeJobsPageState extends State<EmployeeJobsPage> {
     }
   }
 
+
+
   Widget jobCard(Post p) {
 
-    final api = context.read<ApiService>();
+    // final api = context.read<ApiService>();
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -114,7 +262,6 @@ class _EmployeeJobsPageState extends State<EmployeeJobsPage> {
           onTap: () {
             showSheet(context, p);
           },
-
           child: Padding(
             padding: const EdgeInsets.all(16),
 
@@ -190,9 +337,7 @@ class _EmployeeJobsPageState extends State<EmployeeJobsPage> {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 6),
-
                 Text(
                   "${p.location?.state} • ${p.location?.pincode}",
                   style: TextStyle(
